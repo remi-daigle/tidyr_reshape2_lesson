@@ -31,23 +31,38 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p>First install the packages if you haven't already done so:</p>
+        <h2>
+<a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h2>
+
+<p>Both <code>reshape2</code> and <code>tidyr</code> are great R packages used to manipulate your data from the 'wide' to the 'long' format, or vice-versa. The 'long' format is where:</p>
+
+<ul>
+<li>each column is a variable</li>
+<li>each row is an observation</li>
+</ul>
+
+<p>In the 'long' format, you usually have 1 column for the observed variable and the other columns are ID variables. For the 'wide' format each row is often a site/subject/patient and you have multiple observation variables. These can be either repeated observations over time, or observation of multiple variables (or a mix of both). You may find data input may be simpler or some other applications may prefer the 'wide' format. However, many of <code>R</code>'s functions have been designed assuming you have 'long' format data. This tutorial will help you efficiently transform your data regardless of original format.</p>
+
+<h3>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting started</h3>
+
+<p>First install the packages if you haven't already done so:</p>
 
 <pre><code>if (!require("tidyr")) install.packages("tidyr")
 if (!require("reshape2")) install.packages("reshape2")
 if (!require("plyr")) install.packages("plyr")
 </code></pre>
 
-<h2>
-<a id="load-the-packages" class="anchor" href="#load-the-packages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load the packages</h2>
+<h3>
+<a id="load-the-packages" class="anchor" href="#load-the-packages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load the packages</h3>
 
 <pre><code>library("tidyr")
 library("reshape2")
 library("plyr")
 </code></pre>
 
-<h2>
-<a id="loading-the-data" class="anchor" href="#loading-the-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading the data</h2>
+<h3>
+<a id="loading-the-data" class="anchor" href="#loading-the-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading the data</h3>
 
 <p>Load the data, we're using the inflammation data from the <a href="https://github.com/swcarpentry/r-novice-inflammation">Software Carpentry novice R lessons</a></p>
 
@@ -65,27 +80,19 @@ library("plyr")
 head(data)
 </code></pre>
 
-<p>Lets add patient IDs. Yes the method below is a bit more complicated than it needs to be for now, but the patientID's position will be important later</p>
+<p>Lets add patient IDs. Yes the method below is a bit more complicated than it needs to be for now, but the <code>patientID</code>'s position will be important later.</p>
 
 <pre><code>patientID &lt;- c(1:60)
 data &lt;- cbind(patientID, data)
 head(data)
 </code></pre>
 
-<p>Now the dataframe is human-friendly, but what happens if we need to run an analysis with all the inflammation values in 1 column? (e.g. repeated measures ANOVA)
-Another motivation is to have data that meets the basic tenants of well organized "tidy" data where:</p>
+<p>Now the dataframe is human-friendly, but what happens if we need to run an analysis with all the inflammation values in 1 column? (e.g. repeated measures ANOVA). Another motivation is to have data that meets the basic tenants of well organized "tidy" data where each column is a variable and each row is an observation.</p>
 
-<ul>
-<li>each column is a variable</li>
-<li>each row is an observation</li>
-</ul>
-
-<p>To meet these criteria, our dataframe should have 3 columns (variables): patientID, day, and inflammation
-We could use some "brute-force" coding to re-organize the data, but that's encouraging mistakes
-With the reshape2 or tidyr packages, we have the tools to easily re-organize our data</p>
+<p>To meet these criteria, our dataframe should have 3 columns (variables): <code>patientID</code>, <code>day</code>, and <code>inflammation</code>. We could use some "brute-force" coding to re-organize the data, but that's encouraging mistakes. With the <code>reshape2</code> or <code>tidyr</code> packages, we have the tools to easily re-organize our data.</p>
 
 <h2>
-<a id="reshape2melt" class="anchor" href="#reshape2melt" aria-hidden="true"><span class="octicon octicon-link"></span></a>reshape2::melt()</h2>
+<a id="from-wide-to-long-with-reshape2melt" class="anchor" href="#from-wide-to-long-with-reshape2melt" aria-hidden="true"><span class="octicon octicon-link"></span></a>From wide to long with reshape2::melt()</h2>
 
 <p>First, lets try melt() from the reshape2 package:</p>
 
@@ -94,72 +101,101 @@ head(reshaped_data)
 tail(reshaped_data)
 </code></pre>
 
-<p>This is not quite what we needed, melt() took all the columns and treated them equally because we didn't tell it that patientID is an important id variable
-Lets try that again but this time specify the id variables</p>
+<p>This is not quite what we needed, <code>melt()</code> took all the columns and treated them equally because we didn't tell it that patientID is an important id variable.
+Lets try that again but this time specify the id variables.</p>
 
 <pre><code>reshaped_data &lt;- melt(data, id.vars = "patientID")
 head(reshaped_data)
 </code></pre>
 
 <p>What if we had some other information about the patients that we think may be important?
-Let's assume that each patient was given 1 of 3 different drugs. Again, this is a bit more complicated than it needs to be for now, but the drug's position will be important later</p>
+Let's assume that each patient was given 1 of 3 different drugs. Again, this is a bit more complicated than it needs to be for now, but the <code>drug</code>'s position will be important later.</p>
 
 <pre><code>drugs &lt;- rep(c("A", "B", "C"), each = 20)
 data &lt;- as.data.frame(append(data, list(drug = drugs), after = 1))
 head(data)
 </code></pre>
 
-<p>We now need to specify both patientID and drug as id variables</p>
+<p>We now need to specify both <code>patientID</code> and <code>drug</code> as ID variables.</p>
 
 <pre><code>reshaped_data &lt;- melt(data, id.vars = c("patientID", "drug"))
 head(reshaped_data)
 tail(reshaped_data)
 </code></pre>
 
-<p>The variables named patientID and drug are descriptive, but variable and value are not. We can fix that in melt() </p>
+<p>The variables named <code>patientID</code> and <code>drug</code> are descriptive, but <code>variable</code> and <code>value</code> are not. We can fix that in <code>melt()</code>.</p>
 
 <pre><code>reshaped_data &lt;- melt(data, id.vars = c("patientID", "drug"), variable.name = "day", value.name = "inflammation")
 </code></pre>
 
-<p>You can also manipulate data that is in 1 variable. In this data, we might want to seperate the numeric 'day' value from 'day_'. This would be particularly useful if the time units were not consistent (i.e. some as 'day_x' and some as 'week_x')</p>
+<blockquote>
+<p><strong>Challenge problem 1</strong>
+Assuming <code>data_example &lt;- data</code>and <code>data_example</code> had a variable called <code>dose</code> which has the values:</p>
+
+<p><code>data_example$dose &lt;- rep(c("single", "double"), each = 10,3)</code></p>
+
+<p>If we want 'long' format data, should <code>dose</code> be an observation or an ID variable?</p>
+
+<p><sub> * answers to challenge problems can be found at the bottom of this page</sub></p>
+</blockquote>
+
+<h2>
+<a id="fixing-variables-with-reshape2colsplit" class="anchor" href="#fixing-variables-with-reshape2colsplit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fixing variables with reshape2::colsplit()</h2>
+
+<p>You can also manipulate data that is in 1 variable. In this data, we might want to seperate the numeric <code>day</code> value from <code>day_x</code>. This would be particularly useful if the time units were not consistent (i.e. some as <code>day_x</code> and some as <code>week_x</code>)</p>
 
 <pre><code>day_splits &lt;- colsplit(reshaped_data$day, "_", c("unit_time", "time"))
 head(day_splits)
 </code></pre>
 
 <h2>
-<a id="reshape2dcast" class="anchor" href="#reshape2dcast" aria-hidden="true"><span class="octicon octicon-link"></span></a>reshape2::dcast()</h2>
+<a id="from-long-to-wide-with-reshape2dcast" class="anchor" href="#from-long-to-wide-with-reshape2dcast" aria-hidden="true"><span class="octicon octicon-link"></span></a>From long to wide with reshape2::dcast()</h2>
 
 <p>Now if for some reason, you did not keep the original data (e.g. hard-drive failure?) and you need the data with the original formatting back (e.g. if your colleague will only work with it in that format), we can easily re-organize the data back to the original format</p>
 
 <pre><code>unreshaped_data &lt;- dcast(reshaped_data, patientID+drug~day, value.var='inflammation')
 </code></pre>
 
-<p>A brief note on the syntax here; the value variable that gets broken up is inflammation (the column with all the inflammation values). The new column names for the 'inflammation' values comes from the 'day' column (on the right side of the ~) and the id variables (patientID+drug) are on the right side of the '~' seperated by '+'</p>
+<p>A brief note on the syntax here; the value variable that gets broken up is <code>inflammation</code> (the column with all the <code>inflammation</code> values). The new column names for the <code>inflammation</code> values comes from the <code>day</code> column (on the right side of the <code>~</code>) and the id variables (<code>patientID+drug</code>) are on the right side of the <code>~</code> seperated by <code>+</code></p>
 
 <p>Let's double-check that we didn't mess anything up along the way:</p>
 
 <pre><code>identical(data,unreshaped_data)
 </code></pre>
 
+<blockquote>
+<p><strong>Challenge problem 2</strong>
+Assuming <code>data_example &lt;- data</code> and <code>names(data_example) &lt;- c(paste0("day_", 1:20,"_var1"), paste0("day_", 1:20,"_var2"))</code>. If , for some reason, we wanted a format that was intermediate to the long and wide formats. How could you get <code>data_intermediate</code> with 5 columns (<code>patientID,drug,day,var1,var2</code>). Hint: you may find it easier to use all 3 functions we just learned (<code>melt(),colsplit(),dcast()</code>) and you're aiming to get a dataframe with 1200 rows.</p>
+
+<p><sub> * answers to challenge problems can be found at the bottom of this page</sub></p>
+</blockquote>
+
 <h2>
-<a id="tidyrgather" class="anchor" href="#tidyrgather" aria-hidden="true"><span class="octicon octicon-link"></span></a>tidyr::gather()</h2>
+<a id="from-wide-to-long-with-tidyrgather" class="anchor" href="#from-wide-to-long-with-tidyrgather" aria-hidden="true"><span class="octicon octicon-link"></span></a>From wide to long with tidyr::gather()</h2>
 
-<p>The tidyr package does the same kinds of things albeit with different syntax. This is similar to melt(), it will reorganize your data in the 'long' format. Note that in this case, the ID variables (patientID and drug are left out)</p>
+<p>The <code>tidyr</code> package does the same kinds of things albeit with different syntax. This is similar to <code>melt()</code>, it will reorganize your data in the 'long' format. Note that in this case, the ID variables (<code>patientID</code> and <code>drug</code> are left out)</p>
 
-<p>tidied_data &lt;- gather(data, day, inflammation, day_1:day_40)
+<pre><code>tidied_data &lt;- gather(data, day, inflammation, day_1:day_40)
 head(tidied_data)
-identical(tidied_data, reshaped_data)</p>
+identical(tidied_data, reshaped_data)
+</code></pre>
 
-<p>Gather also allows the alternative syntax of using the '-' symbol to identify which variables are not to be gathered (i.e. ID variables)</p>
+<p>Gather also allows the alternative syntax of using the <code>-</code> symbol to identify which variables are not to be gathered (i.e. ID variables)</p>
 
 <pre><code>tidied_data &lt;- gather(data, day, inflammation, -patientID, -drug)
 head(tidied_data)
 identical(tidied_data, reshaped_data)
 </code></pre>
 
+<blockquote>
+<p><strong>Challenge problem 3</strong>
+Assuming <code>data_example &lt;- data</code>. If we wanted to omit <code>day_35</code> to <code>day_40</code> from the 'long' format data, how could we do that without removing those variables from data_example.</p>
+
+<p><sub> * answers to challenge problems can be found at the bottom of this page</sub></p>
+</blockquote>
+
 <h2>
-<a id="tidyrseparate" class="anchor" href="#tidyrseparate" aria-hidden="true"><span class="octicon octicon-link"></span></a>tidyr::separate()</h2>
+<a id="fixing-variables-with-tidyrseparate" class="anchor" href="#fixing-variables-with-tidyrseparate" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fixing variables with tidyr::separate()</h2>
 
 <p>Similar to <code>colsplit()</code>, <code>separate()</code> will split a variable into multiple</p>
 
@@ -167,9 +203,9 @@ identical(tidied_data, reshaped_data)
 </code></pre>
 
 <h2>
-<a id="tidyrspread" class="anchor" href="#tidyrspread" aria-hidden="true"><span class="octicon octicon-link"></span></a>tidyr::spread()</h2>
+<a id="from-long-to-wide-with-tidyrspread" class="anchor" href="#from-long-to-wide-with-tidyrspread" aria-hidden="true"><span class="octicon octicon-link"></span></a>From long to wide with tidyr::spread()</h2>
 
-<p>The tidyr package does the same kinds of things albeit with different syntax</p>
+<p>Similar to <code>dcast()</code>, spread() will reorganize your data into the 'wide' format.</p>
 
 <pre><code>untidied_data &lt;- spread(tidied_data,day, inflammation)
 head(untidied_data)
@@ -181,7 +217,7 @@ identical(untidied_data, unreshaped_data)
 <h2>
 <a id="side-by-side-comparison" class="anchor" href="#side-by-side-comparison" aria-hidden="true"><span class="octicon octicon-link"></span></a>Side by side comparison</h2>
 
-<p>Tidyr is designed specifically to tidy dataframes while reshape2 is a bit more for general reshaping</p>
+<p><code>tidyr</code> is designed specifically to tidy dataframes while <code>reshape2</code> is a bit more for general reshaping</p>
 
 <p>They seem to be roughly equally efficient computationally</p>
 
@@ -191,16 +227,98 @@ system.time(melt(data_big, id.vars=c("patientID","drug"), variable.name="day", v
 system.time(gather(data_big, day, inflammation, day_1:day_40))
 </code></pre>
 
-<p>Reshape allows functions which is useful when id variables are not unique. Here we calculate the mean inflammation for each drug</p>
+<p><code>reshape2</code> allows functions which is useful when id variables are not unique. Here we calculate the mean <code>inflammation</code> for each <code>drug</code></p>
 
 <pre><code>means_drug &lt;- dcast( reshaped_data, drug ~ day, value.var="inflammation", fun.aggregate = mean)
 head(means_drug)
 </code></pre>
 
-<p>You can also use dcast's sybling acast() to get an array instead of a dataframe</p>
+<p>You can also use <code>dcast</code>'s sybling <code>acast()</code> to get an array instead of a dataframe</p>
 
 <pre><code>unreshaped_data_array &lt;- acast(reshaped_data, patientID+drug~day, value.var='inflammation')
 </code></pre>
+
+<h2>
+<a id="example-analysis" class="anchor" href="#example-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example analysis</h2>
+
+<p>Above, I had suggested using a repeated measures ANOVA. Let's try examining the effect of <code>drug</code> on our patients with repeated measures over time. </p>
+
+<pre><code>aov_output &lt;- aov(inflammation ~ drug*day + Error(patientID/drug), data = tidied_data)
+summary(aov_output)
+</code></pre>
+
+<p>Don't worry so much about the specific formulation of the aov, but rather that we were able to do it with the 'long' format data. We can't use <code>aov()</code> on the 'wide' format because the dependent variable <code>inflammation</code> is spread out over multiple columns. For more information on repeated measures ANOVA:
+<a href="http://ww2.coastal.edu/kingw/statistics/R-tutorials/repeated.html">http://ww2.coastal.edu/kingw/statistics/R-tutorials/repeated.html</a>
+Or for general statistics in <code>R</code>:</p>
+
+<ul>
+<li>it would be great to link to the statistics lesson once it up</li>
+</ul>
+
+<h2>
+<a id="other-great-resources" class="anchor" href="#other-great-resources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other great resources:</h2>
+
+<h4>
+<a id="general" class="anchor" href="#general" aria-hidden="true"><span class="octicon octicon-link"></span></a>General:</h4>
+
+<p><a href="http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/">http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/</a>
+<a href="http://www.rstudio.com/resources/cheatsheets/">http://www.rstudio.com/resources/cheatsheets/</a></p>
+
+<h4>
+<a id="tidyr" class="anchor" href="#tidyr" aria-hidden="true"><span class="octicon octicon-link"></span></a>tidyr:</h4>
+
+<p><a href="http://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html">http://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html</a>
+<a href="http://blog.rstudio.org/2014/07/22/introducing-tidyr/">http://blog.rstudio.org/2014/07/22/introducing-tidyr/</a></p>
+
+<h4>
+<a id="reshape2" class="anchor" href="#reshape2" aria-hidden="true"><span class="octicon octicon-link"></span></a>reshape2:</h4>
+
+<p><a href="http://seananderson.ca/2013/10/19/reshape.html">http://seananderson.ca/2013/10/19/reshape.html</a></p>
+
+<blockquote>
+<p><strong>Answers to challenge problem</strong></p>
+
+<ul>
+<li>Challenge problem 1:
+
+<ul>
+<li>It would be better to include <code>dose</code> as an ID variable since it identifies which type of treatment was received by that patient. You would use: <code>reshaped_data &lt;- melt(data, id.vars = c("patientID", "drug"))</code> to reorganize the data</li>
+</ul>
+</li>
+<li>Challenge problem 2:
+
+<ul>
+<li>First, reorganize into the full 'long' format 
+
+<ul>
+<li><code>data_example_long &lt;- melt(data_example, id.vars = c("patientID", "drug"), variable.name = "day_var", value.name = "value")</code></li>
+</ul>
+</li>
+<li>Second, split the <code>day_var</code> column
+
+<ul>
+<li><code>data_example_long &lt;- cbind(data_example_long,colsplit(data_example_long$day_var,"_", c("unit_time", "day", "var")))</code></li>
+</ul>
+</li>
+<li>Lastly, reorganize into an intermediate format 
+
+<ul>
+<li>
+<code>data_intermediate &lt;- dcast(data_example_long, patientID+drug+day~var, value.var='value')</code><br>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Challenge problem 3:
+
+<ul>
+<li>This was a bit of a trick question to make sure you understood that the <code>-</code> before the variable names for the gather function are not to omit those variables completely, but rather use those as an ID variable. <code>tidied_data_example &lt;- gather(data_example[,-37:42], day, inflammation, -patientID, -drug)</code>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
       </section>
     </div>
 
