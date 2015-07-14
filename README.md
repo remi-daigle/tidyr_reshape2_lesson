@@ -152,6 +152,14 @@ They seem to be roughly equally efficient computationally
 
     means_drug <- dcast( reshaped_data, drug ~ day, value.var="inflammation", fun.aggregate = mean)
     head(means_drug)
+    
+# similar to using `ddply()` and `summarize()` from the `plyr` package, but plyr is a bit more flexible
+
+    ddply_drugs <- ddply(reshaped_data,c("drug","day"),summarise,
+                        mean_inflammation=mean(inflammation),
+                        sd_inflammation=sd(inflammation)
+                        )
+
 
 You can also use `dcast`'s sybling `acast()` to get an array instead of a dataframe
 

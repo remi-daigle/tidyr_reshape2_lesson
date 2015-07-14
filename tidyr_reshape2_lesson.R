@@ -151,6 +151,13 @@ system.time(gather(data_big, day, inflammation, day_1:day_40))
 # `reshape2` allows functions which is useful when id variables are not unique. Here we calculate the mean `inflammation` for each `drug`
 # 
 means_drug <- dcast( reshaped_data, drug ~ day, value.var="inflammation", fun.aggregate = mean)
+
+# similar to using `ddply()` and `summarize()` from the `plyr` package, but plyr is a bit more flexible
+ddply_drugs <- ddply(reshaped_data,c("drug","day"),summarise,
+                     mean_inflammation=mean(inflammation),
+                     sd_inflammation=sd(inflammation)
+                     )
+
 head(means_drug)
 # 
 # You can also use `dcast`'s sybling `acast()` to get an array instead of a dataframe
