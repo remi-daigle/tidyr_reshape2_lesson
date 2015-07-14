@@ -153,7 +153,7 @@ They seem to be roughly equally efficient computationally
     means_drug <- dcast( reshaped_data, drug ~ day, value.var="inflammation", fun.aggregate = mean)
     head(means_drug)
     
-# similar to using `ddply()` and `summarize()` from the `plyr` package, but plyr is a bit more flexible
+Similar to using `ddply()` and `summarize()` from the `plyr` package, but plyr is a bit more flexible
 
     ddply_drugs <- ddply(reshaped_data,c("drug","day"),summarise,
                         mean_inflammation=mean(inflammation),
@@ -177,9 +177,13 @@ Or for general statistics in `R`:
 * it would be great to link to the statistics lesson once it up
 
 ## Other great resources:
+#### Scientific Programming Study Group at SFU
+http://sciprog.ca
+
 #### General:
 http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/
 http://www.rstudio.com/resources/cheatsheets/
+
 #### tidyr:
 http://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html
 http://blog.rstudio.org/2014/07/22/introducing-tidyr/
