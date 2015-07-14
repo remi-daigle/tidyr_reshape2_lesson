@@ -233,6 +233,15 @@ system.time(gather(data_big, day, inflammation, day_1:day_40))
 head(means_drug)
 </code></pre>
 
+<h1>
+<a id="similar-to-using-ddply-and-summarize-from-the-plyr-package-but-plyr-is-a-bit-more-flexible" class="anchor" href="#similar-to-using-ddply-and-summarize-from-the-plyr-package-but-plyr-is-a-bit-more-flexible" aria-hidden="true"><span class="octicon octicon-link"></span></a>similar to using <code>ddply()</code> and <code>summarize()</code> from the <code>plyr</code> package, but plyr is a bit more flexible</h1>
+
+<pre><code>ddply_drugs &lt;- ddply(reshaped_data,c("drug","day"),summarise,
+                    mean_inflammation=mean(inflammation),
+                    sd_inflammation=sd(inflammation)
+                    )
+</code></pre>
+
 <p>You can also use <code>dcast</code>'s sybling <code>acast()</code> to get an array instead of a dataframe</p>
 
 <pre><code>unreshaped_data_array &lt;- acast(reshaped_data, patientID+drug~day, value.var='inflammation')
