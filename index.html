@@ -165,7 +165,7 @@ head(day_splits)
 
 <blockquote>
 <p><strong>Challenge problem 2</strong>
-Assuming <code>data_example &lt;- data</code> and <code>names(data_example) &lt;- c(paste0("day_", 1:20,"_var1"), paste0("day_", 1:20,"_var2"))</code>. If , for some reason, we wanted a format that was intermediate to the long and wide formats. How could you get <code>data_intermediate</code> with 5 columns (<code>patientID,drug,day,var1,var2</code>). Hint: you may find it easier to use all 3 functions we just learned (<code>melt(),colsplit(),dcast()</code>) and you're aiming to get a dataframe with 1200 rows.</p>
+Assuming <code>data_example &lt;- data</code> and <code>names(data_example) &lt;- c("patientID","drug",paste0("day_", 1:20,"_var1"), paste0("day_", 1:20,"_var2"))</code>. If , for some reason, we wanted a format that was intermediate to the long and wide formats. How could you get <code>data_intermediate</code> with 5 columns (<code>patientID,drug,day,var1,var2</code>). Hint: you may find it easier to use all 3 functions we just learned (<code>melt(),colsplit(),dcast()</code>) and you're aiming to get a dataframe with 1200 rows.</p>
 
 <p><sub> * answers to challenge problems can be found at the bottom of this page</sub></p>
 </blockquote>
