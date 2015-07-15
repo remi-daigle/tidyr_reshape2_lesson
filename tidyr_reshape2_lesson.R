@@ -101,7 +101,7 @@ unreshaped_data <- dcast(reshaped_data, patientID+drug~day, value.var='inflammat
     identical(data,unreshaped_data)
 # 
 # > **Challenge problem 2**
-#     > Assuming `data_example <- data` and `names(data_example) <- c(paste0("day_", 1:20,"_var1"), paste0("day_", 1:20,"_var2"))`. If , for some reason, we wanted a format that was intermediate to the long and wide formats. How could you get `data_intermediate` with 5 columns (`patientID,drug,day,var1,var2`). Hint: you may find it easier to use all 3 functions we just learned (`melt(),colsplit(),dcast()`) and you're aiming to get a dataframe with 1200 rows.
+#     > Assuming `data_example <- data` and `names(data_example) <- c("patientID","drug",paste0("day_", 1:20,"_var1"), paste0("day_", 1:20,"_var2"))`. If , for some reason, we wanted a format that was intermediate to the long and wide formats. How could you get `data_intermediate` with 5 columns (`patientID,drug,day,var1,var2`). Hint: you may find it easier to use all 3 functions we just learned (`melt(),colsplit(),dcast()`) and you're aiming to get a dataframe with 1200 rows.
 # > 
 # ><sub> * answers to challenge problems can be found at the bottom of this page</sub>
 # 
